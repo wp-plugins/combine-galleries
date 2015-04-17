@@ -1,5 +1,5 @@
 === Combine Galleries ===
-Contributors: indiewave
+Contributors: jackfilms
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6XT9FH6XW7EPJ
 Tags: gallery, shortcode, portfolio
 Requires at least: 3.5
@@ -16,25 +16,21 @@ This plugin gives you the ability to use standard WordPress galleries and taxono
 
 Let's say you're a builder and you post all your jobs on your site and include an image gallery with each post. Now, suppose you want to display all your job images on a single portfolio page. What's the easiest way to do that?  Use the following:
 
-```
-[combine-galleries]
-```
+
+    [combine-galleries]
+
 
 Suppose you build patios, decks, and enclosures. Now, suppose you want to display all your job images, grouped by job type, on a single portfolio page. Categorize your job posts (patio, deck, enclosure) and use the following:
 
-```
-[combine-galleries category="patio"]
-[combine-galleries category="deck"]
-[combine-galleries category="enclosure"]
-```
+    [combine-galleries category="patio"]
+    [combine-galleries category="deck"]
+    [combine-galleries category="enclosure"]
 
 Finally, suppose you want to create a page optimized for a specific city (let's use Raleigh). And, on that page you want to display all your Raleigh jobs grouped by type. Tag your job posts by city and use the following:
 
-```
-[combine-galleries category="patio" tag="raleigh"]
-[combine-galleries category="deck" tag="raleigh"]
-[combine-galleries category="enclosure" tag="raleigh"]
-```
+    [combine-galleries category="patio" tag="raleigh"]
+    [combine-galleries category="deck" tag="raleigh"]
+    [combine-galleries category="enclosure" tag="raleigh"]
 
 Combine-Galleries allows you to combine and display gallery images from multiple posts based on taxonomy. The combine-galleries shortcode combines and displays image galleries from posts that match the categories and/or tags you specify.  You don't need to categorize or tag your images, just the posts.  If you just want to display all gallery images on a single page, you don't need to categorize or tag anything.
 
@@ -46,13 +42,12 @@ If you find this plugin useful, please consider a small donation of $5. All proc
 -------------------------------------------------
 
 There are several options that may be specified using this syntax:
-```
- [combine-galleries option1="value1" option2="value2"]
-```
+
+    [combine-galleries option1="value1" option2="value2"]
+
 You can also print a gallery directly in a template like so:
-```
- <?php echo do_shortcode('[combine-galleries option1="value1"]'); ?>
-```
+
+    <?php echo do_shortcode('[combine-galleries option1="value1"]'); ?>
 
 ##Options##
 -----------------------------------------------------
@@ -100,9 +95,7 @@ orderby
 order 
 :  Specify the sort order of gallery posts. ASC or DESC (Default). For example, to sort by post ID from biggest to smallest:
 
-```
-  [combine-galleries orderby="ID" order="DESC"]
-```
+    [combine-galleries orderby="ID" order="DESC"]
 
 limitposts
 :  Limit the number of posts. By default there is no limit.
@@ -113,9 +106,7 @@ limitpostimages
 columns 
 :  specify the number of columns. The gallery will include a break tag at the end of each row, and calculate the column width as appropriate. The default value is 3. If columns is set to 0, no row breaks will be included. For example, to display a 4 column gallery:
 
-```
-  [combine-galleries columns="4"]
-```
+    [combine-galleries columns="4"]
 
 size 
 :  Specify the image size to use for the thumbnail display. Valid values include:
@@ -128,9 +119,7 @@ size
 
 The size of the images for “thumbnail”, “medium” and “large” can be configured in WordPress admin panel under Settings \> Media. For example, to display a gallery of medium sized images:
 
-```
-  [combine-galleries size="medium"]
-```
+    [combine-galleries size="medium"]
 
 ###Advanced Options###
 
@@ -143,9 +132,7 @@ icontag
 captiontag
 :  the name of the XHTML tag used to enclose each caption. The default is “dd”. For example, to change the gallery markup to use div, span and p tags:
 
-```
-  [combine-galleries itemtag="div" icontag="span" captiontag="p"]
-```
+    [combine-galleries itemtag="div" icontag="span" captiontag="p"]
 
 link
 :  Specify where you want the image to link. If this option is not specified or if no value is given, the image links to the attachment's permalink. Options:
