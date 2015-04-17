@@ -4,7 +4,7 @@
   Plugin Name: Combine Galleries
   Plugin URI:
   Description: Automatically build a single gallery page from all your WordPress post galleries using a simple shortcode. Great for creating a main gallery page.
-  Version: 1.0.0
+  Version: 1.0.1
   Author: John Upchurch (jackfilms)
   Author URI: http://boxsmash.com
   License: GPLv3 (http://www.gnu.org/licenses/gpl.html)
@@ -74,17 +74,17 @@ function combine_galleries_handler($atts) {
     $type = array_map('trim', explode($delimiter, str_replace($other_delimiters, $delimiter, strtolower($type))));
     $category = array_map('trim', explode($delimiter, str_replace($other_delimiters, $delimiter, strtolower($category))));
     $tag = array_map('trim', explode($delimiter, str_replace($other_delimiters, $delimiter, strtolower($tag))));
-    
+
     $orderby = strtolower(trim($orderby));
     if (empty($orderby) or ! in_array($orderby, array("id", "post_author", "post_date", "post_title", "comment_count"))) {
         $orderby = "post_date";
     }
-    
+
     $order = strtolower(trim($order));
     if (empty($order) or ! in_array($order, array("asc", "desc"))) {
         $order = "DESC";
     }
-    
+
     $limitposts = trim($limitposts);
     $limitpostimages = trim($limitpostimages);
 
@@ -119,30 +119,54 @@ function combine_galleries_handler($atts) {
 
         $sql .= "
             JOIN (
-                    SELECT ID FROM (
-                        SELECT    $wpdb->term_relationships.object_id as id,
-                                SUM(CASE WHEN $wpdb->term_taxonomy.taxonomy = 'category' AND lower($wpdb->terms.name) IN ('" . implode("','", $category) . "') THEN 1 ELSE 0 END) AS cat_count,
-                                SUM(CASE WHEN $wpdb->term_taxonomy.taxonomy = 'post_tag' AND lower($wpdb->terms.name) IN ('" . implode("','", $tag) . "') THEN 1 ELSE 0 END) AS tag_count
-                        FROM    $wpdb->term_taxonomy
-                                JOIN $wpdb->terms
-                                  ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
-                                JOIN $wpdb->term_relationships
-                                  ON $wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id
-                       GROUP BY id
-                       ) taxonomy
-                    WHERE ((cat_count >= $cat_count) $taxonomy_join (tag_count >= $tag_count))
-            ) terms
-            ON terms.id =  $wpdb->posts.id";
+            SELECT ID FROM (
+            SELECT $wpdb->term_relationships.object_id as id, ";
+
+        if (empty($category) or empty($category["0"])) {
+            $sql .= "0 as cat_count, ";
+        } else {
+            $sql .= "SUM(CASE WHEN $wpdb->term_taxonomy.taxonomy = 'category' AND lower($wpdb->terms.name) IN ('" . implode("', '", $category) . "') THEN 1 ELSE 0 END) AS cat_count, ";
+        }
+
+        if (empty($tag) or empty($tag["0"])) {
+            $sql .= "0 as tag_count";
+        } else {
+            $sql .= "SUM(CASE WHEN $wpdb->term_taxonomy.taxonomy = 'post_tag' AND lower($wpdb->terms.name) IN ('" . implode("', '", $tag) . "') THEN 1 ELSE 0 END) AS tag_count";
+        }
+
+        $sql .= "
+            FROM $wpdb->term_taxonomy
+            JOIN $wpdb->terms
+            ON $wpdb->terms.term_id = $wpdb->term_taxonomy.term_id
+            JOIN $wpdb->term_relationships
+            ON $wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id
+            GROUP BY id
+            ) taxonomy
+            WHERE ";
+
+        if (empty($category) or empty($category["0"])) {
+            $sql .= "(tag_count >= $tag_count))";
+        } else if (empty($tag) or empty($tag["0"])) {
+            $sql .= "(cat_count >= $cat_count)";
+        } else {
+            $sql .= "((cat_count >= $cat_count) $taxonomy_join (tag_count >= $tag_count))";
+        }
+        $sql .= "  ) terms
+                ON terms.id = $wpdb->posts.id";
     }
 
     $sql .= "
-    WHERE  $wpdb->posts.post_type IN ('" . implode("','", $type) . "')
-           AND $wpdb->posts.post_status = 'publish'
-           AND $wpdb->posts.post_content like '%[gallery%'
-    ORDER  BY $wpdb->posts.$orderby $order ";
+                WHERE $wpdb->posts.post_type IN ('" . implode("',  '", $type) . "' )
+                AND $wpdb->posts.post_status = 'publish'
+                AND $wpdb->posts.post_content like '%[gallery%'
+                ORDER BY $wpdb->posts.$orderby $order ";
 
     if (intval($limitposts) > 0) {
         $sql .= "LIMIT $limitposts";
+    }
+
+    if (strtolower($debug) == "true") {
+        $result .= "$sql<br>";
     }
 
     $ids = "";
@@ -150,11 +174,10 @@ function combine_galleries_handler($atts) {
     if ($pageposts) {
         foreach ($pageposts as $post) {
             $startpos = strpos($post->post_content, "[gallery");
-            if (!empty($startpos)) {
+            if (is_numeric($startpos)) {
                 $endpos = strpos(substr($post->post_content, $startpos), "]");
-                if (!empty($endpos)) {
-                    $shortcode = substr($post->post_content, $startpos, $endpos + 1);
-                    $shortcode = str_replace("]", " ]", $shortcode);
+                if (is_numeric($endpos)) {
+                    $shortcode = substr($post->post_content, $startpos, $endpos) . " dummy=\"\"]";
                     $atts = shortcode_parse_atts($shortcode);
                     if (intval($limitpostimages) > 0) {
                         $ids_array = explode(",", $atts["ids"], intval($limitpostimages) + 1);
@@ -194,7 +217,7 @@ function combine_galleries_handler($atts) {
         $gallery_shortcode .= "ids = \"$ids\"]";
 
         if (strtolower($debug) == "true") {
-            $result .= $gallery_shortcode;
+            $result .= "$gallery_shortcode<br>";
         }
         $result .= do_shortcode($gallery_shortcode);
     }
