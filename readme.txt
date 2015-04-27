@@ -162,6 +162,9 @@ This test should display all WordPress gallery images from your 50 most recent p
 
 == Changelog ==
 
+= 1.0.2 =
+* Fix - Remove database table prefix from debug output string as a security precaution.
+
 = 1.0.1 =
 * Fix - Gallery does not display when only one taxonomy is given.
 

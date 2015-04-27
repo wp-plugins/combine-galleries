@@ -4,7 +4,7 @@
   Plugin Name: Combine Galleries
   Plugin URI:
   Description: Automatically build a single gallery page from all your WordPress post galleries using a simple shortcode. Great for creating a main gallery page.
-  Version: 1.0.1
+  Version: 1.0.2
   Author: John Upchurch (jackfilms)
   Author URI: http://boxsmash.com
   License: GPLv3 (http://www.gnu.org/licenses/gpl.html)
@@ -166,7 +166,11 @@ function combine_galleries_handler($atts) {
     }
 
     if (strtolower($debug) == "true") {
-        $result .= "$sql<br>";
+        if (!empty($wpdb->prefix)) {
+            $result .= str_replace($wpdb->prefix, "", $sql) . "<br>";
+        } else {
+            $result .= "$sql<br>";
+        }
     }
 
     $ids = "";
